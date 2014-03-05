@@ -46,47 +46,24 @@ video {
   width: 320px;
   height: 480px;
   overflow: hidden;
+  perspective: 100px;
 }
 
 .sys-windows {
   /* Hard code w/h for now */
   height: 480px;
-  perspective: 100px;
   position: absolute;
   width: 640px;
 }
 
-@keyframes sys-zoom-out {
-  100% {
-    transform: scale(0.9);
-  }
-}
-
-@keyframes sys-zoom-in {
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes sys-bump-rtl {
-  100% {
-    transform: translateX(-320px);
-  }
-}
-
 /* Do it all as one pan keyframe animatin on strip. Also have zoom/scale
 happen at same time toward end to give illusion of momentum. */
-@keyframes sys-pan-rtl {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-
+@keyframes sys-to-home {
   30% {
-    transform: translate3d(0, 0, );
+    transform: translate3d(-320px, 0, -10px);
   }
-
   100% {
-    transform: translateX(-320px);
+    transform: translate3d(-320px, 0, 0);
   }
 }
 
@@ -97,20 +74,8 @@ happen at same time toward end to give illusion of momentum. */
   width: 320px;
 }
 
-.sys-window-zoomed-out {
-  transform: scale(0.9);
-}
-
-.sys-window-zoom-out {
-  animation: sys-zoom-out 200ms ease-out forwards;
-}
-
-.sys-window-zoom-in {
-  animation: sys-zoom-in 200ms ease-out forwards;
-}
-
-.sys-windows-bump-rtl {
-  animation: sys-bump-rtl 500ms cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+.sys-animate-to-home {
+  animation: sys-to-home 1000ms ease-out forwards;
 }
 
 #sys-window-home {

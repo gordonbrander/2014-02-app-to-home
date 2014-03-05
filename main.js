@@ -1,51 +1,45 @@
-// Minimal signal flow
-// -----------------------------------------------------------------------------
-
-// Push a value to an array as a side-effect. Returns value.
-function add(array, value) {
-  array.push(value);
-  return value;
-}
-
-// Call function with non-null value as side-effect. Returns value.
-function callWith(value, f) {
-  f(value);
-  return value;
-}
-
-// Invoke every function in an array of functions with value as side effect.
-// Returns value.
-function invoke(fns, value) {
-  return fns.reduce(callWith, value);
-}
-
-// Intercept wire `a` with `assemble`, allowing values to be transformed and
-// forwarded to wire `z`. Returns `z`.
-function transform(a, xform) {
-  var z = [];
-  // On state, call `xform with z and value`. Note that if upstream wire `a`
-  // has a null state, `xform` will not be called until a state is set for `a`.
-  add(a, function onStateTransform(value) {
-    xform(z, value);
-  });
-  return z;
-}
-
-function filter(a, predicate) {
-  return transform(a, function transformFilter(z, value) {
-    if (predicate(value)) invoke(z, value);
-  });
-}
-
+// Create an events function containing all DOM events of `name` on `element`.
+// Returns an event function.
 function on(element, name, useCapture) {
-  var z = [];
-
-  element.addEventListener(name, function onEvent(event) {
-    invoke(z, event);
-  }, !!useCapture);
-
-  return z;
+  // Note that each call to resulting event function will attach a new listener.
+  // If you want to share a single listener between multiple consumers,
+  // transform `eventsOnDomEvents` with `hub()`.
+  return (function eventsOnDomEvents(next) {
+    element.addEventListener(name, next, !!useCapture);
+  });
 }
+
+function filter(events, predicate) {
+  return (function eventsFiltered(next) {
+    events(function nextFilter(value) {
+      if (predicate(v)) next(value);
+    });
+  });
+}
+
+// Hub a source event so it is only consumed once. Occurances of original event
+// will be dispatched to every callback.
+// 
+// Note that callbacks added after event consumption starts will miss
+// earlier events.
+function hub(events) {
+  var nexts = [];
+  var isStarted = false;
+
+  return (function eventsHubbed(next) {
+    nexts.push(next);
+
+    // Kick off source event if not done yet.
+    if (!isStarted) {
+      events(function nextDispatchToHub(value) {
+        nexts.reduce(callWith, value);
+      });
+
+      isStarted = true;
+    }
+  });
+}
+
 
 // Helpers
 // -----------------------------------------------------------------------------
@@ -68,30 +62,15 @@ function withEventTarget(element) {
 // -----------------------------------------------------------------------------
 
 function app() {
-  var elements = {
-    emailWindow: document.getElementById('sys-window-email'),
-    homeWindow: document.getElementById('sys-window-home'),
-    windows: document.getElementById('sys-windows')
-  };
+  var emailWindowEl = document.getElementById('sys-window-email');
+  var homeWindowEl = document.getElementById('sys-window-home');
+  var windowsEl = document.getElementById('sys-windows');
 
-  var kickoffs = on(window, 'click');
+  var clicks = on(window, 'click');
   var animationends = on(window, 'animationend');
 
-  var zoomOutEnds = filter(animationends, withEventAnimationName('sys-zoom-out'));
-  var zoomInEnds = filter(animationends, withEventAnimationName('sys-zoom-in'));
-  var bumpRtlEnds = filter(animationends, withEventAnimationName('sys-bump-rtl'));
-
-  add(kickoffs, function () {
-    elements.homeWindow.classList.add('sys-window-zoomed-out');
-    elements.emailWindow.classList.add('sys-window-zoom-out');
-  });
-
-  add(zoomOutEnds, function () {
-    elements.windows.classList.add('sys-windows-bump-rtl');
-  });
-
-  add(bumpRtlEnds, function () {
-    elements.homeWindow.classList.add('sys-window-zoom-in');
+  clicks(function () {
+    windowsEl.classList.add('sys-animate-to-home');
   });
 }
 
