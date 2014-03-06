@@ -1,6 +1,6 @@
 {
-    "name": "Notifications",
-    "description": "Core UX notifications prototype",
+    "name": "App : Home",
+    "description": "App to home transition prototype",
     "developer": {
       "name": "Mozilla",
       "url": "https://github.com/gordonbrander/"
