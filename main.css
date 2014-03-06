@@ -50,6 +50,9 @@ video {
 }
 
 .sys-windows {
+  /* Doing this under the superstition that it will cause a faster composite,
+  since it can be treated as a layer w/o opacity. */
+  background: #000;
   /* Hard code w/h for now */
   height: 480px;
   position: absolute;
@@ -91,6 +94,17 @@ happen at same time toward end to give illusion of momentum. */
   }
 }
 
+@keyframes sys-launch {
+  0% {
+    opacity: 0;
+    transform: scale(.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .sys-window {
   /* Hard code w/h for now */
   height: 480px;
@@ -99,16 +113,16 @@ happen at same time toward end to give illusion of momentum. */
   width: 320px;
 }
 
-.anim-to-home {
+.state-to-home {
   animation: sys-to-home 1100ms cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
 }
 /* 660 */
-.anim-to-app-from-home {
+.state-to-app-from-home {
   animation: sys-to-app-from-home 1100ms cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
 }
 
-.sys-anim-pause {
-  animation-play-state: paused;
+.state-to-launch {
+  animation: sys-launch 700ms cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
 }
 
 /* RocketBar .rb-
